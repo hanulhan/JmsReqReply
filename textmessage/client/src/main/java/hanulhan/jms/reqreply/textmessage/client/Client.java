@@ -7,6 +7,7 @@ package hanulhan.jms.reqreply.textmessage.client;
 
 import hanulhan.jms.reqreply.textmessage.util.Settings;
 import java.util.Random;
+import java.util.Scanner;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
 import javax.jms.*;
@@ -18,15 +19,16 @@ import org.apache.log4j.Logger;
  * @author uhansen
  */
 public class Client implements MessageListener {
+
     private static final Logger LOGGER = Logger.getLogger(Client.class);
 
     private boolean transacted = false;
     private MessageProducer producer;
 
-
-    public Client() {
+    public Client(int aId, Boolean aDoReply) {
         ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(Settings.MESSAGE_BROKER_URL);
         Connection connection;
+        int msgCount= 1;
         try {
             LOGGER.log(Level.TRACE, "Start Client");
             connection = connectionFactory.createConnection();
@@ -49,7 +51,7 @@ public class Client implements MessageListener {
 
             //Now create the actual message you want to send
             TextMessage txtMessage = session.createTextMessage();
-            txtMessage.setText("MyProtocolMessage");
+            txtMessage.setText("MyProtocolMessage " + msgCount);
 
             //Set the reply to field to the temp queue you created above, this is the queue the server
             //will respond to
@@ -62,8 +64,31 @@ public class Client implements MessageListener {
             //message somehow...a Map works good
             String correlationId = this.createRandomString();
             txtMessage.setJMSCorrelationID(correlationId);
-            LOGGER.log(Level.TRACE, "Start Send Message");
+            LOGGER.log(Level.TRACE, "Send Message: " + txtMessage.toString());
             this.producer.send(txtMessage);
+
+            Boolean terminate = false;
+            Scanner keyboard = new Scanner(System.in);
+
+            while (terminate == false) {
+                LOGGER.log(Level.INFO, "Press any key + <Enter> to continue and x + <Enter> to exit");
+                String input = keyboard.nextLine();
+                if (input != null) {
+                    if ("x".equals(input)) {
+                        LOGGER.log(Level.INFO, "Exit program");
+                        terminate = true;
+                    } else {
+                        msgCount++;
+                        txtMessage.setText("MyProtocolMessage " + msgCount);
+                        LOGGER.log(Level.TRACE, "Send Message: " + txtMessage.toString());
+                        this.producer.send(txtMessage);
+                    }
+
+                }
+            }
+            session.close();
+            connection.close();
+
         } catch (JMSException e) {
             LOGGER.log(Level.ERROR, e);
         }
@@ -84,12 +109,25 @@ public class Client implements MessageListener {
                 LOGGER.log(Level.TRACE, "Receive Message: " + messageText);
             }
         } catch (JMSException e) {
-            //Handle the exception appropriately
+            LOGGER.log(Level.ERROR, "JMSException," + e);
         }
     }
 
     public static void main(String[] args) {
-        new Client();
+        int myId = 1;
+        Boolean myDoReply = true;
+
+        if (args.length > 0 && args[0].equals("?")) {
+            LOGGER.log(Level.TRACE, "JmsRequRepylClient <clientId|?> [<doReply=true|false>]");
+        } else if (args.length > 0) {
+            myId = Integer.parseInt(args[0]);
+            if (args.length > 1) {
+                myDoReply = Boolean.parseBoolean(args[1]);
+            }
+
+        }
+
+        Client client = new Client(myId, myDoReply);
     }
 
 }
