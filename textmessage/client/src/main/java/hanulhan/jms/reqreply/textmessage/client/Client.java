@@ -6,6 +6,7 @@
 package hanulhan.jms.reqreply.textmessage.client;
 
 import hanulhan.jms.reqreply.textmessage.util.Settings;
+import static java.lang.Thread.sleep;
 import java.util.Random;
 import java.util.Scanner;
 import org.apache.activemq.ActiveMQConnectionFactory;
@@ -23,22 +24,29 @@ public class Client implements MessageListener {
     private static final Logger LOGGER = Logger.getLogger(Client.class);
 
     private boolean transacted = false;
-    private MessageProducer producer;
+    private int clientId;
+    private Boolean doReply;
 
     public Client(int aId, Boolean aDoReply) {
         ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(Settings.MESSAGE_BROKER_URL);
+        MessageProducer producer;
         Connection connection;
-        int msgCount= 1;
+        String correlationId;
+        
+        clientId= aId;
+        doReply= aDoReply;
+        
+        int msgCount = 1;
         try {
-            LOGGER.log(Level.TRACE, "Start Client");
+            LOGGER.log(Level.TRACE, "Start Client(" + clientId + ")" );
             connection = connectionFactory.createConnection();
             connection.start();
             Session session = connection.createSession(transacted, Settings.CLIENT_ACK_MODE);
             Destination adminQueue = session.createQueue(Settings.MESSAGE_QUEUE_NAME);
 
             //Setup a message producer to send message to the queue the server is consuming from
-            this.producer = session.createProducer(adminQueue);
-            this.producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+            producer = session.createProducer(adminQueue);
+            producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
 
             //Create a temporary queue that this client will listen for responses on then create a consumer
             //that consumes message from this temporary queue...for a real application a client should reuse
@@ -51,7 +59,7 @@ public class Client implements MessageListener {
 
             //Now create the actual message you want to send
             TextMessage txtMessage = session.createTextMessage();
-            txtMessage.setText("MyProtocolMessage " + msgCount);
+            txtMessage.setText("Message " + msgCount + " from Client "+ clientId);
 
             //Set the reply to field to the temp queue you created above, this is the queue the server
             //will respond to
@@ -62,15 +70,16 @@ public class Client implements MessageListener {
             //same correlation ID can be used for all the messages...if there is more than one outstanding
             //message to the server you would presumably want to associate the correlation ID with this
             //message somehow...a Map works good
-            String correlationId = this.createRandomString();
+            correlationId = this.createRandomString();
             txtMessage.setJMSCorrelationID(correlationId);
-            LOGGER.log(Level.TRACE, "Send Message: " + txtMessage.toString());
-            this.producer.send(txtMessage);
+            LOGGER.log(Level.TRACE, "Send Message (" + correlationId + "): " + txtMessage.getText());
+            producer.send(txtMessage);
 
             Boolean terminate = false;
             Scanner keyboard = new Scanner(System.in);
 
             while (terminate == false) {
+                sleep(100);
                 LOGGER.log(Level.INFO, "Press any key + <Enter> to continue and x + <Enter> to exit");
                 String input = keyboard.nextLine();
                 if (input != null) {
@@ -79,9 +88,12 @@ public class Client implements MessageListener {
                         terminate = true;
                     } else {
                         msgCount++;
-                        txtMessage.setText("MyProtocolMessage " + msgCount);
-                        LOGGER.log(Level.TRACE, "Send Message: " + txtMessage.toString());
-                        this.producer.send(txtMessage);
+                        correlationId = this.createRandomString();
+                        txtMessage.setJMSCorrelationID(correlationId);
+
+                        txtMessage.setText("Message " + msgCount + " from Client "+ clientId);
+                        LOGGER.log(Level.TRACE, "Send Message (" + correlationId + "): " + txtMessage.getText());
+                        producer.send(txtMessage);
                     }
 
                 }
@@ -91,6 +103,8 @@ public class Client implements MessageListener {
 
         } catch (JMSException e) {
             LOGGER.log(Level.ERROR, e);
+        } catch (InterruptedException ex) {
+            java.util.logging.Logger.getLogger(Client.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
     }
 
