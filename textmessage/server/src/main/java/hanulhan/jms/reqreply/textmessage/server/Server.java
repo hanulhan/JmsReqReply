@@ -100,15 +100,16 @@ public class Server implements MessageListener {
                 LOGGER.log(Level.INFO, "Server(" + serverId + ") received message[" + messageText + "]"); 
                 response.setText("Server(" + serverId + ") response msg[" + messageText + "]");
             }
+            if (message.getJMSReplyTo() != null)    {
+                //Set the correlation ID from the received message to be the correlation id of the response message
+                //this lets the client identify which message this is a response to if it has more than
+                //one outstanding message to the server
+                response.setJMSCorrelationID(message.getJMSCorrelationID());
 
-            //Set the correlation ID from the received message to be the correlation id of the response message
-            //this lets the client identify which message this is a response to if it has more than
-            //one outstanding message to the server
-            response.setJMSCorrelationID(message.getJMSCorrelationID());
-
-            //Send the response to the Destination specified by the JMSReplyTo field of the received message,
-            //this is presumably a temporary queue created by the client
-            this.replyProducer.send(message.getJMSReplyTo(), response);
+                //Send the response to the Destination specified by the JMSReplyTo field of the received message,
+                //this is presumably a temporary queue created by the client
+                this.replyProducer.send(message.getJMSReplyTo(), response);
+            }
         } catch (JMSException e) {
             LOGGER.log(Level.ERROR, "JMS Exception: " + e);
         }
