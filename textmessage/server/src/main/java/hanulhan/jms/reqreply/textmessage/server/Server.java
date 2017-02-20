@@ -146,8 +146,10 @@ public class Server implements MessageListener {
         }
 
         if (startBroker) {
+            LOGGER.log(Level.TRACE, "Start Broker");
             Server.startBroker();
         }
+        LOGGER.log(Level.TRACE, "Start Server");
         myServer = new Server(myServerId);
 
         myServer.close();

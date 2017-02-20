@@ -49,7 +49,7 @@
     
 
     <root>
-        <level value="WARN" />
+        <level value="INFO" />
         <appender-ref ref="console" />
     </root>
 
