@@ -5,7 +5,6 @@
  */
 package hanulhan.jms.reqreply.textmessage.server;
 
-import hanulhan.jms.reqreply.textmessage.util.MessageProtocol;
 import hanulhan.jms.reqreply.textmessage.util.Settings;
 import java.util.Scanner;
 import org.apache.activemq.broker.BrokerService;
@@ -26,22 +25,18 @@ public class Server implements MessageListener {
     private Connection connection;
     private boolean transacted = false;
     private MessageProducer replyProducer;
-    private MessageProtocol messageProtocol;
     private Destination adminQueue;
     private MessageConsumer consumer;
-    private int serverId;
+    private final int serverId;
     private static final Logger LOGGER = Logger.getLogger(Server.class);
 
     public Server(int aServerId) {
-        serverId= aServerId;
+        serverId = aServerId;
         Boolean terminate = false;
         Scanner keyboard = new Scanner(System.in);
-        LOGGER.log(Level.INFO, "Starting Server(" + aServerId + ")");
-        
 
         //Delegating the handling of messages to another class, instantiate it before setting up JMS so it
         //is ready to handle messages
-        this.messageProtocol = new MessageProtocol();
         this.setupMessageQueueConsumer();
         while (terminate == false) {
             LOGGER.log(Level.INFO, "Press x + <Enter> to terminate the Server");
@@ -69,11 +64,11 @@ public class Server implements MessageListener {
     }
 
     private void setupMessageQueueConsumer() {
-        connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+        connectionFactory = new ActiveMQConnectionFactory(Settings.MESSAGE_BROKER_URL);
 
         try {
             connection = connectionFactory.createConnection();
-            connection.start();
+
             session = connection.createSession(this.transacted, Settings.SERVER_ACK_MODE);
             adminQueue = this.session.createQueue(Settings.MESSAGE_QUEUE_NAME);
 
@@ -85,35 +80,13 @@ public class Server implements MessageListener {
             //Set up a consumer to consume messages off of the admin queue
             consumer = this.session.createConsumer(adminQueue);
             consumer.setMessageListener(this);
+            connection.start();
+            LOGGER.log(Level.INFO, "Starting Server(" + serverId + "), Broker: " + connectionFactory.getBrokerURL());
         } catch (JMSException e) {
             LOGGER.log(Level.ERROR, "JMS Exception: " + e);
         }
     }
 
-    @Override
-    public void onMessage(Message message) {
-        try {
-            TextMessage response = this.session.createTextMessage();
-            if (message instanceof TextMessage) {
-                TextMessage txtMsg = (TextMessage) message;
-                String messageText = txtMsg.getText();
-                LOGGER.log(Level.INFO, "Server(" + serverId + ") received message[" + messageText + "]"); 
-                response.setText("Server(" + serverId + ") response msg[" + messageText + "]");
-            }
-            if (message.getJMSReplyTo() != null)    {
-                //Set the correlation ID from the received message to be the correlation id of the response message
-                //this lets the client identify which message this is a response to if it has more than
-                //one outstanding message to the server
-                response.setJMSCorrelationID(message.getJMSCorrelationID());
-
-                //Send the response to the Destination specified by the JMSReplyTo field of the received message,
-                //this is presumably a temporary queue created by the client
-                this.replyProducer.send(message.getJMSReplyTo(), response);
-            }
-        } catch (JMSException e) {
-            LOGGER.log(Level.ERROR, "JMS Exception: " + e);
-        }
-    }
 
     public void close() {
         try {
@@ -128,7 +101,7 @@ public class Server implements MessageListener {
 
     public static void main(String[] args) {
         Boolean startBroker = true;
-        int myServerId=1;
+        int myServerId = 1;
         Server myServer = null;
 
         LOGGER.log(Level.TRACE, "Server:main()");
@@ -136,12 +109,11 @@ public class Server implements MessageListener {
             if ("?".equals(args[0])) {
                 LOGGER.log(Level.INFO, "java -jar Server serverId, [startBroker=true|false]");
             } else {
-                myServerId= Integer.parseInt(args[0]);
+                myServerId = Integer.parseInt(args[0]);
             }
 
-
             if (args.length == 2 && Boolean.parseBoolean(args[1]) == false) {
-                    startBroker = false;
+                startBroker = false;
             }
         }
 
@@ -149,11 +121,43 @@ public class Server implements MessageListener {
             LOGGER.log(Level.TRACE, "Start Broker");
             Server.startBroker();
         }
+                    Server.startBroker();
         LOGGER.log(Level.TRACE, "Start Server");
         myServer = new Server(myServerId);
 
         myServer.close();
 
+    }
+
+    @Override
+    public void onMessage(Message msg) {
+                try {
+            TextMessage response = this.session.createTextMessage();
+            if (msg instanceof TextMessage) {
+
+                TextMessage txtMsg = (TextMessage) msg;
+                String messageText = txtMsg.getText();
+                LOGGER.log(Level.TRACE, "Server(" + serverId + ") received message[" + messageText + "]");
+
+//                Scanner keyboard = new Scanner(System.in);
+//                String input = keyboard.nextLine();
+                //message.acknowledge();
+                //LOGGER.log(Level.INFO, "Send ACK"); 
+                response.setText("Server(" + serverId + ") response msg[" + messageText + "]");
+            }
+            if (msg.getJMSReplyTo() != null) {
+                //Set the correlation ID from the received message to be the correlation id of the response message
+                //this lets the client identify which message this is a response to if it has more than
+                //one outstanding message to the server
+                response.setJMSCorrelationID(msg.getJMSCorrelationID());
+
+                //Send the response to the Destination specified by the JMSReplyTo field of the received message,
+                //this is presumably a temporary queue created by the client
+                this.replyProducer.send(msg.getJMSReplyTo(), response);
+            }
+        } catch (JMSException e) {
+            LOGGER.log(Level.ERROR, "JMS Exception: " + e);
+        }
     }
 
 }

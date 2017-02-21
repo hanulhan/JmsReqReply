@@ -42,7 +42,7 @@ public class Client implements MessageListener {
 
         int msgCount = 1;
         try {
-            LOGGER.log(Level.TRACE, "Start Client(" + clientId + ")");
+            LOGGER.log(Level.TRACE, "Start Client(" + clientId + "), Broker: " + connectionFactory.getBrokerURL());
             connection = connectionFactory.createConnection();
             connection.start();
             Session session = connection.createSession(transacted, Settings.CLIENT_ACK_MODE);
@@ -51,6 +51,7 @@ public class Client implements MessageListener {
             //Setup a message producer to send message to the queue the server is consuming from
             producer = session.createProducer(adminQueue);
             producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+//            producer.setDeliveryMode(DeliveryMode.PERSISTENT);
 
             //Now create the actual message you want to send
             txtMessage = session.createTextMessage();
