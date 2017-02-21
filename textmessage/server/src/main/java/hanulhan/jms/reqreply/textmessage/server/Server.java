@@ -27,7 +27,9 @@ public class Server implements MessageListener {
     static {
         messageBrokerUrl = "tcp://localhost:61616";
         startBroker = false;
-//        messageBrokerUrl = "tcp://192.168.1.61:61616";
+        messageBrokerUrl = "tcp://192.168.1.61:61616";
+//        messageBrokerUrl = "tcp://localhost:61616";
+//        messageBrokerUrl = "tcp://192.168.178.80:61616";
         messageQueueName = "client.messages";
         ackMode = Session.AUTO_ACKNOWLEDGE;
     }
