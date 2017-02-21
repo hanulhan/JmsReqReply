@@ -4,6 +4,8 @@ import org.apache.activemq.ActiveMQConnectionFactory;
  
 import javax.jms.*;
 import java.util.Random;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
  
 public class Client implements MessageListener {
     private static int ackMode;
@@ -11,6 +13,7 @@ public class Client implements MessageListener {
  
     private boolean transacted = false;
     private MessageProducer producer;
+    private static final Logger LOGGER = Logger.getLogger(Client.class);
  
     static {
         clientQueueName = "client.messages";
@@ -21,6 +24,7 @@ public class Client implements MessageListener {
         ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
         Connection connection;
         try {
+            LOGGER.log(Level.DEBUG, "Start Client,  Broker: " + connectionFactory.getBrokerURL());
             connection = connectionFactory.createConnection();
             connection.start();
             Session session = connection.createSession(transacted, ackMode);
@@ -70,9 +74,10 @@ public class Client implements MessageListener {
         String messageText = null;
         try {
             if (message instanceof TextMessage) {
+
                 TextMessage textMessage = (TextMessage) message;
                 messageText = textMessage.getText();
-                System.out.println("messageText = " + messageText);
+                LOGGER.log(Level.DEBUG, "Client received message: [" + messageText + "]");
             }
         } catch (JMSException e) {
             //Handle the exception appropriately

@@ -9,6 +9,8 @@ import org.apache.activemq.broker.BrokerService;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
 import javax.jms.*;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
  
 public class Server implements MessageListener {
     private static int ackMode;
@@ -19,6 +21,7 @@ public class Server implements MessageListener {
     private boolean transacted = false;
     private MessageProducer replyProducer;
     private MessageProtocol messageProtocol;
+    private static final Logger LOGGER = Logger.getLogger(Server.class);
  
     static {
         messageBrokerUrl = "tcp://localhost:61616";
@@ -27,6 +30,7 @@ public class Server implements MessageListener {
     }
  
     public Server() {
+        LOGGER.log(Level.TRACE, "Server:Server()");
         try {
             //This message broker is embedded
             BrokerService broker = new BrokerService();
@@ -34,6 +38,7 @@ public class Server implements MessageListener {
             broker.setUseJmx(false);
             broker.addConnector(messageBrokerUrl);
             broker.start();
+            LOGGER.log(Level.DEBUG, "Start Broker");
         } catch (Exception e) {
             //Handle the exception appropriately
         }
@@ -48,6 +53,7 @@ public class Server implements MessageListener {
         ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(messageBrokerUrl);
         Connection connection;
         try {
+            LOGGER.log(Level.TRACE, "Server::setupMessageQueueConsumer()");
             connection = connectionFactory.createConnection();
             connection.start();
             this.session = connection.createSession(this.transacted, ackMode);
@@ -69,9 +75,11 @@ public class Server implements MessageListener {
     public void onMessage(Message message) {
         try {
             TextMessage response = this.session.createTextMessage();
+            LOGGER.log(Level.TRACE, "Server::onMessage()");
             if (message instanceof TextMessage) {
                 TextMessage txtMsg = (TextMessage) message;
                 String messageText = txtMsg.getText();
+                LOGGER.log(Level.TRACE, "Server received TextMessage[" + messageText + "]");
                 response.setText(this.messageProtocol.handleProtocolMessage(messageText));
             }
  
