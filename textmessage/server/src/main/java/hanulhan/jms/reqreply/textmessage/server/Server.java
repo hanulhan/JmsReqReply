@@ -16,6 +16,7 @@ public class Server implements MessageListener {
     private static int ackMode;
     private static String messageQueueName;
     private static String messageBrokerUrl;
+    private static Boolean startBroker;
  
     private Session session;
     private boolean transacted = false;
@@ -25,6 +26,8 @@ public class Server implements MessageListener {
  
     static {
         messageBrokerUrl = "tcp://localhost:61616";
+        startBroker = true;
+//        messageBrokerUrl = "tcp://192.168.1.61:61616";
         messageQueueName = "client.messages";
         ackMode = Session.AUTO_ACKNOWLEDGE;
     }
@@ -33,14 +36,16 @@ public class Server implements MessageListener {
         LOGGER.log(Level.TRACE, "Server:Server()");
         try {
             //This message broker is embedded
-            BrokerService broker = new BrokerService();
-            broker.setPersistent(false);
-            broker.setUseJmx(false);
-            broker.addConnector(messageBrokerUrl);
-            broker.start();
-            LOGGER.log(Level.DEBUG, "Start Broker");
+            if (startBroker) {
+                BrokerService broker = new BrokerService();
+                broker.setPersistent(false);
+                broker.setUseJmx(false);
+                broker.addConnector(messageBrokerUrl);
+                broker.start();
+                LOGGER.log(Level.DEBUG, "Start Broker");
+            }
         } catch (Exception e) {
-            //Handle the exception appropriately
+            LOGGER.log(Level.ERROR, e);
         }
  
         //Delegating the handling of messages to another class, instantiate it before setting up JMS so it
@@ -68,7 +73,7 @@ public class Server implements MessageListener {
             MessageConsumer consumer = this.session.createConsumer(adminQueue);
             consumer.setMessageListener(this);
         } catch (JMSException e) {
-            //Handle the exception appropriately
+            LOGGER.log(Level.ERROR, e);
         }
     }
  
@@ -92,7 +97,7 @@ public class Server implements MessageListener {
             //this is presumably a temporary queue created by the client
             this.replyProducer.send(message.getJMSReplyTo(), response);
         } catch (JMSException e) {
-            //Handle the exception appropriately
+            LOGGER.log(Level.ERROR, e);
         }
     }
  
