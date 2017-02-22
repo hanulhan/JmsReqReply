@@ -102,19 +102,28 @@ public class Server implements MessageListener {
                 TextMessage txtMsg = (TextMessage) message;
                 String messageText = txtMsg.getText();
                 LOGGER.log(Level.TRACE, "Server(" + serverId + ") received TextMessage[" + messageText + "]");
-                LOGGER.log(Level.INFO, "Press x + <Enter> to terminate the Server  \n");
-                if (message.getJMSReplyTo() != null) {
-                    TextMessage response = this.session.createTextMessage();
-                    response.setText("Server(" + serverId + ") reply to [" + messageText + "]");
-                    //Set the correlation ID from the received message to be the correlation id of the response message
-                    //this lets the client identify which message this is a response to if it has more than
-                    //one outstanding message to the server
-                    response.setJMSCorrelationID(message.getJMSCorrelationID());
+                String[] temp = messageText.split("from");
+                String intValue = temp[0].replaceAll("[^0-9]+", "");
+                int msgCount = Integer.parseInt(intValue);
 
-                    //Send the response to the Destination specified by the JMSReplyTo field of the received message,
-                    //this is presumably a temporary queue created by the client
-                    this.replyProducer.send(message.getJMSReplyTo(), response);
-                }
+
+                if ((serverId % 2 == 0 && msgCount % 2 == 0) || (serverId %2 != 0 && msgCount %2 != 0) )  {
+                    message.acknowledge();
+                    LOGGER.log(Level.DEBUG, "Server(" + serverId + ") send ACK to msgNo: " + msgCount);
+                    if (message.getJMSReplyTo() != null) {
+                        TextMessage response = this.session.createTextMessage();
+                        response.setText("Server(" + serverId + ") reply to [" + messageText + "]");
+                        //Set the correlation ID from the received message to be the correlation id of the response message
+                        //this lets the client identify which message this is a response to if it has more than
+                        //one outstanding message to the server
+                        response.setJMSCorrelationID(message.getJMSCorrelationID());
+
+                        //Send the response to the Destination specified by the JMSReplyTo field of the received message,
+                        //this is presumably a temporary queue created by the client
+                        this.replyProducer.send(message.getJMSReplyTo(), response);
+                    }
+                }   
+                LOGGER.log(Level.INFO, "Press x + <Enter> to terminate the Server  \n");
 
             }
 
