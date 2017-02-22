@@ -36,7 +36,7 @@ public class Client implements MessageListener {
             LOGGER.log(Level.DEBUG, "Start Client(" + clientId + "),  Broker: " + connectionFactory.getBrokerURL());
             connection = connectionFactory.createConnection();
             connection.start();
-            session = connection.createSession(transacted, Settings.CLIENT_ACK_MODE);
+            session = connection.createSession(transacted, Settings.REP_ACK_MODE);
             Destination adminQueue = session.createQueue(Settings.MESSAGE_QUEUE_NAME);
 
             //Setup a message producer to send message to the queue the server is consuming from

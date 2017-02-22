@@ -1,6 +1,7 @@
 package hanulhan.jms.reqreply.textmessage.util;
 
 
+import javax.jms.DeliveryMode;
 import javax.jms.Session;
 
 /*
@@ -18,6 +19,10 @@ public class Settings {
 //    public static final String MESSAGE_BROKER_URL="tcp://192.168.1.61:61616";
     public static final String MESSAGE_BROKER_URL = "tcp://192.168.21.10:61616";
     public static final String MESSAGE_QUEUE_NAME = "client.message.reqreply";
-    public static final int SERVER_ACK_MODE = Session.CLIENT_ACKNOWLEDGE;
-    public static final int CLIENT_ACK_MODE = Session.CLIENT_ACKNOWLEDGE;
+    // Server
+    public static final int REQ_ACK_MODE = Session.CLIENT_ACKNOWLEDGE;
+    public static final int REQ_DELIVERY_MODE = DeliveryMode.PERSISTENT;
+    // Client
+    public static final int REP_ACK_MODE = Session.CLIENT_ACKNOWLEDGE;
+    public static final int REP_DELIVIRY_MODE = DeliveryMode.NON_PERSISTENT;
 }

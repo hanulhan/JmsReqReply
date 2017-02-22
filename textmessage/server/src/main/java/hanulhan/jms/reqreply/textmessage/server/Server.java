@@ -78,7 +78,7 @@ public class Server implements MessageListener {
             LOGGER.log(Level.TRACE, "Server::setupMessageQueueConsumer()");
             connection = connectionFactory.createConnection();
             connection.start();
-            this.session = connection.createSession(this.transacted, Settings.SERVER_ACK_MODE);
+            this.session = connection.createSession(this.transacted, Settings.REQ_ACK_MODE);
             Destination adminQueue = this.session.createQueue(Settings.MESSAGE_QUEUE_NAME);
 
             //Setup a message producer to respond to messages from clients, we will get the destination
