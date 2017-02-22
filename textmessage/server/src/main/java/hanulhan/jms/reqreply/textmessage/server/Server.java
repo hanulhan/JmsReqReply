@@ -6,6 +6,7 @@
 package hanulhan.jms.reqreply.textmessage.server;
 
 import hanulhan.jms.reqreply.textmessage.util.Settings;
+import static java.lang.Thread.sleep;
 import java.util.Scanner;
 import org.apache.activemq.broker.BrokerService;
 import org.apache.activemq.ActiveMQConnectionFactory;
@@ -34,7 +35,8 @@ public class Server implements MessageListener {
 
         //Delegating the handling of messages to another class, instantiate it before setting up JMS so it
         //is ready to handle messages
-        this.setupMessageQueueConsumer();
+//        this.setupMessageQueueConsumer();
+        this.setupMessageTopicConsumer();
         while (terminate == false) {
             LOGGER.log(Level.INFO, "Press x + <Enter> to terminate the Server");
             String input = keyboard.nextLine();
@@ -79,7 +81,7 @@ public class Server implements MessageListener {
             connection = connectionFactory.createConnection();
             connection.start();
             this.session = connection.createSession(this.transacted, Settings.REQ_ACK_MODE);
-            Destination adminQueue = this.session.createQueue(Settings.MESSAGE_QUEUE_NAME);
+            Destination adminQueue = this.session.createQueue(Settings.MESSAGE_TOPIC_NAME);
 
             //Setup a message producer to respond to messages from clients, we will get the destination
             //to send to from the JMSReplyTo header field from a Message
@@ -94,6 +96,28 @@ public class Server implements MessageListener {
         }
     }
 
+        private void setupMessageTopicConsumer() {
+        connectionFactory = new ActiveMQConnectionFactory(Settings.MESSAGE_BROKER_URL);
+        try {
+            LOGGER.log(Level.TRACE, "Server::setupMessageTopicConsumer()");
+            connection = connectionFactory.createConnection();
+            connection.start();
+            this.session = connection.createSession(this.transacted, Settings.REQ_ACK_MODE);
+            Destination adminTopic = this.session.createTopic(Settings.MESSAGE_TOPIC_NAME);
+
+            //Setup a message producer to respond to messages from clients, we will get the destination
+            //to send to from the JMSReplyTo header field from a Message
+            this.replyProducer = this.session.createProducer(null);
+            this.replyProducer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+
+            //Set up a consumer to consume messages off of the admin queue
+            MessageConsumer consumer = this.session.createConsumer(adminTopic);
+            consumer.setMessageListener(this);
+        } catch (JMSException e) {
+            LOGGER.log(Level.ERROR, e);
+        }
+    }
+    
     @Override
     public void onMessage(Message message) {
         try {
@@ -106,29 +130,27 @@ public class Server implements MessageListener {
                 String intValue = temp[0].replaceAll("[^0-9]+", "");
                 int msgCount = Integer.parseInt(intValue);
 
-
-                if ((serverId % 2 == 0 && msgCount % 2 == 0) || (serverId %2 != 0 && msgCount %2 != 0) )  {
-                    message.acknowledge();
-                    LOGGER.log(Level.DEBUG, "Server(" + serverId + ") send ACK to msgNo: " + msgCount);
-                    if (message.getJMSReplyTo() != null) {
-                        TextMessage response = this.session.createTextMessage();
-                        response.setText("Server(" + serverId + ") reply to [" + messageText + "]");
-                        //Set the correlation ID from the received message to be the correlation id of the response message
-                        //this lets the client identify which message this is a response to if it has more than
-                        //one outstanding message to the server
-                        response.setJMSCorrelationID(message.getJMSCorrelationID());
-
-                        //Send the response to the Destination specified by the JMSReplyTo field of the received message,
-                        //this is presumably a temporary queue created by the client
-                        this.replyProducer.send(message.getJMSReplyTo(), response);
-                    }
-                }   
+                if ((serverId % 2 == 0 && msgCount % 2 == 0) || (serverId % 2 != 0 && msgCount % 2 != 0)) {
+                    LOGGER.log(Level.INFO, "Server(" + serverId + ") take the msg and send ACK");
+                    TextMessage response = this.session.createTextMessage();
+                    response.setText("Server(" + serverId + ") got messageId: " + message.getJMSCorrelationID());
+                    response.setJMSCorrelationID(message.getJMSCorrelationID());
+                    this.replyProducer.send(message.getJMSReplyTo(), response);
+                
+                    sleep(500);
+                    response = this.session.createTextMessage();
+                    response.setText("Server(" + serverId + ") process messageId: " + message.getJMSCorrelationID());
+                    response.setJMSCorrelationID(message.getJMSCorrelationID());
+                    this.replyProducer.send(message.getJMSReplyTo(), response);
+                }
                 LOGGER.log(Level.INFO, "Press x + <Enter> to terminate the Server  \n");
 
             }
 
         } catch (JMSException e) {
             LOGGER.log(Level.ERROR, e);
+        } catch (InterruptedException ex) {
+            java.util.logging.Logger.getLogger(Server.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
     }
 

@@ -37,7 +37,7 @@ public class Client implements MessageListener {
             connection = connectionFactory.createConnection();
             connection.start();
             session = connection.createSession(transacted, Settings.REP_ACK_MODE);
-            Destination adminQueue = session.createQueue(Settings.MESSAGE_QUEUE_NAME);
+            Destination adminQueue = session.createTopic(Settings.MESSAGE_TOPIC_NAME);
 
             //Setup a message producer to send message to the queue the server is consuming from
             this.producer = session.createProducer(adminQueue);
@@ -59,7 +59,7 @@ public class Client implements MessageListener {
             Scanner keyboard = new Scanner(System.in);
 
             while (terminate == false) {
-                sleep(100);
+                sleep(1000);
                 LOGGER.log(Level.INFO, "Press any key + <Enter> to continue and x + <Enter> to exit");
                 String input = keyboard.nextLine();
                 if (input != null) {
