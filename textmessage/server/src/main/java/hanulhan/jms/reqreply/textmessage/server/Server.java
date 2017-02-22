@@ -102,7 +102,6 @@ public class Server implements MessageListener {
                 TextMessage txtMsg = (TextMessage) message;
                 String messageText = txtMsg.getText();
                 LOGGER.log(Level.TRACE, "Server(" + serverId + ") received TextMessage[" + messageText + "]");
-
                 LOGGER.log(Level.INFO, "Press x + <Enter> to terminate the Server  \n");
                 if (message.getJMSReplyTo() != null) {
                     TextMessage response = this.session.createTextMessage();

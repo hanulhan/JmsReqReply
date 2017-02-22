@@ -18,6 +18,6 @@ public class Settings {
 //    public static final String MESSAGE_BROKER_URL="tcp://192.168.1.61:61616";
     public static final String MESSAGE_BROKER_URL = "tcp://192.168.21.10:61616";
     public static final String MESSAGE_QUEUE_NAME = "client.message.reqreply";
-    public static final int SERVER_ACK_MODE = Session.AUTO_ACKNOWLEDGE;
-    public static final int CLIENT_ACK_MODE = Session.AUTO_ACKNOWLEDGE;
+    public static final int SERVER_ACK_MODE = Session.CLIENT_ACKNOWLEDGE;
+    public static final int CLIENT_ACK_MODE = Session.CLIENT_ACKNOWLEDGE;
 }
