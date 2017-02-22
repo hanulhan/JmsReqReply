@@ -14,7 +14,6 @@ import javax.jms.Session;
  * @author uhansen
  */
 public class Settings {
-    public static final Boolean startBrokerFlag = false;
 //    public static final String MESSAGE_BROKER_URL = "tcp://localhost:61616";
 //    public static final String MESSAGE_BROKER_URL="tcp://192.168.1.61:61616";
     public static final String MESSAGE_BROKER_URL = "tcp://192.168.21.10:61616";
