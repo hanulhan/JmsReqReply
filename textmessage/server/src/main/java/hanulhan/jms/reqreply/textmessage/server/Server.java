@@ -5,6 +5,7 @@
  */package hanulhan.jms.reqreply.textmessage.server;
 
 import hanulhan.jms.reqreply.textmessage.util.MessageProtocol;
+import hanulhan.jms.reqreply.textmessage.util.Settings;
 import java.util.Scanner;
 import org.apache.activemq.broker.BrokerService;
 import org.apache.activemq.ActiveMQConnectionFactory;
@@ -15,37 +16,22 @@ import org.apache.log4j.Logger;
 
 public class Server implements MessageListener {
 
-    private static int ackMode;
-    private static String messageQueueName;
-    private static String messageBrokerUrl;
-    private static Boolean startBroker;
-
     private Session session;
     Connection connection;
+
     private boolean transacted = false;
     private MessageProducer replyProducer;
     private MessageProtocol messageProtocol;
     private static final Logger LOGGER = Logger.getLogger(Server.class);
 
-    static {
-//        messageBrokerUrl = "tcp://localhost:61616";
-        startBroker = false;
-        messageBrokerUrl = "tcp://192.168.21.10:61616";
-//        messageBrokerUrl = "tcp://192.168.1.61:61616";
-//        messageBrokerUrl = "tcp://localhost:61616";
-//        messageBrokerUrl = "tcp://192.168.178.80:61616";
-
-        messageQueueName = "client.messages";
-        ackMode = Session.AUTO_ACKNOWLEDGE;
-    }
-
+    
     public Server() {
 
         Boolean terminate = false;
         Scanner keyboard = new Scanner(System.in);
 
         LOGGER.log(Level.TRACE, "Server:Server()");
-        if (startBroker) {
+        if (Settings.startBrokerFlag) {
             startBroker();
         }
 
@@ -81,7 +67,7 @@ public class Server implements MessageListener {
             BrokerService broker = new BrokerService();
             broker.setPersistent(false);
             broker.setUseJmx(false);
-            broker.addConnector(messageBrokerUrl);
+            broker.addConnector(Settings.MESSAGE_BROKER_URL);
             broker.start();
         } catch (Exception e) {
             LOGGER.log(Level.ERROR, "JMS Exception: " + e);
@@ -89,13 +75,13 @@ public class Server implements MessageListener {
     }
 
     private void setupMessageQueueConsumer() {
-        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(messageBrokerUrl);
+        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(Settings.MESSAGE_BROKER_URL);
         try {
             LOGGER.log(Level.TRACE, "Server::setupMessageQueueConsumer()");
             connection = connectionFactory.createConnection();
             connection.start();
-            this.session = connection.createSession(this.transacted, ackMode);
-            Destination adminQueue = this.session.createQueue(messageQueueName);
+            this.session = connection.createSession(this.transacted, Settings.SERVER_ACK_MODE);
+            Destination adminQueue = this.session.createQueue(Settings.MESSAGE_QUEUE_NAME);
 
             //Setup a message producer to respond to messages from clients, we will get the destination
             //to send to from the JMSReplyTo header field from a Message

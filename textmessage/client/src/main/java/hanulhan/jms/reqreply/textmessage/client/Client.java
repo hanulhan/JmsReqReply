@@ -1,5 +1,6 @@
 package hanulhan.jms.reqreply.textmessage.client;
 
+import hanulhan.jms.reqreply.textmessage.util.Settings;
 import static java.lang.Thread.sleep;
 import org.apache.activemq.ActiveMQConnectionFactory;
  
@@ -10,22 +11,16 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
  
 public class Client implements MessageListener {
-    private static int ackMode;
-    private static String clientQueueName;
  
     private boolean transacted = false;
     private MessageProducer producer;
     private static final Logger LOGGER = Logger.getLogger(Client.class);
  
-    static {
-        clientQueueName = "client.messages";
-        ackMode = Session.AUTO_ACKNOWLEDGE;
-    }
  
     public Client() throws InterruptedException {
 
 //        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
-        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://192.168.21.10:61616");
+        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(Settings.MESSAGE_BROKER_URL);
 //        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://192.168.1.61:61616");
 //        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://192.168.178.80:61616");
         Connection connection;
@@ -34,8 +29,8 @@ public class Client implements MessageListener {
             LOGGER.log(Level.DEBUG, "Start Client,  Broker: " + connectionFactory.getBrokerURL());
             connection = connectionFactory.createConnection();
             connection.start();
-            Session session = connection.createSession(transacted, ackMode);
-            Destination adminQueue = session.createQueue(clientQueueName);
+            Session session = connection.createSession(transacted, Settings.CLIENT_ACK_MODE);
+            Destination adminQueue = session.createQueue(Settings.MESSAGE_QUEUE_NAME);
  
             //Setup a message producer to send message to the queue the server is consuming from
             this.producer = session.createProducer(adminQueue);
@@ -103,11 +98,13 @@ public class Client implements MessageListener {
     }
  
     private String createRandomString() {
-        Random random = new Random(System.currentTimeMillis());
+        Random random;
+        random = new Random(System.currentTimeMillis());
         long randomLong = random.nextLong();
         return Long.toHexString(randomLong);
     }
  
+    @Override
     public void onMessage(Message message) {
         String messageText = null;
         try {
