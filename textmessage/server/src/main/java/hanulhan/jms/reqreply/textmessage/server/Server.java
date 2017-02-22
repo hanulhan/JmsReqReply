@@ -119,7 +119,7 @@ public class Server implements MessageListener {
                 String messageText = txtMsg.getText();
                 LOGGER.log(Level.TRACE, "Server received TextMessage[" + messageText + "]");
                 response.setText( "Server reply for [" + messageText  + "]" );
-                LOGGER.log(Level.INFO, "Press x + <Enter> to terminate the Server");
+                LOGGER.log(Level.INFO, "Press x + <Enter> to terminate the Serverg  \n");
             }
 
             //Set the correlation ID from the received message to be the correlation id of the response message
