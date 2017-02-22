@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>hanulhan.jms.req-reply</groupId>
+		<artifactId>topic</artifactId>
+	</parent>
+
+    <groupId>hanulhan.jms.req-reply.topic</groupId>
+    <artifactId>spring</artifactId>
+    <name>JmsReqReply :: Topic :: Spring</name>
+    <packaging>jar</packaging>
     
-    <groupId>hanulhan.jms</groupId>
-    <artifactId>reqreply</artifactId>
-    <version>1.0</version>
-    <name>JmsReqReply :: Parent</name>
-    <packaging>pom</packaging>
-    
-    <modules>
-        <module>queue</module>
-        <module>topic</module>
-    </modules>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
