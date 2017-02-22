@@ -1,9 +1,11 @@
 package hanulhan.jms.reqreply.textmessage.client;
 
+import static java.lang.Thread.sleep;
 import org.apache.activemq.ActiveMQConnectionFactory;
  
 import javax.jms.*;
 import java.util.Random;
+import java.util.Scanner;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
  
@@ -20,13 +22,14 @@ public class Client implements MessageListener {
         ackMode = Session.AUTO_ACKNOWLEDGE;
     }
  
-    public Client() {
+    public Client() throws InterruptedException {
 
 //        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
         ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://192.168.21.10:61616");
 //        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://192.168.1.61:61616");
 //        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://192.168.178.80:61616");
         Connection connection;
+        int msgCount = 0;
         try {
             LOGGER.log(Level.DEBUG, "Start Client,  Broker: " + connectionFactory.getBrokerURL());
             connection = connectionFactory.createConnection();
@@ -62,10 +65,40 @@ public class Client implements MessageListener {
             //message somehow...a Map works good
             String correlationId = this.createRandomString();
             txtMessage.setJMSCorrelationID(correlationId);
-            this.producer.send(txtMessage);
-            LOGGER.log(Level.DEBUG, "Send TextMessage: [" + txtMessage.getText() + "]");
+
+            // ##########################################
+            Boolean terminate = false;
+            Scanner keyboard = new Scanner(System.in);
+
+            while (terminate == false) {
+                sleep(100);
+                LOGGER.log(Level.INFO, "Press any key + <Enter> to continue and x + <Enter> to exit");
+                String input = keyboard.nextLine();
+                if (input != null) {
+                    if ("x".equals(input)) {
+                        LOGGER.log(Level.INFO, "Exit program");
+                        terminate = true;
+                    } else {
+                        msgCount++;
+                        correlationId = this.createRandomString();
+                        txtMessage.setJMSCorrelationID(correlationId);
+
+//                        txtMessage.setText("Message " + msgCount + " from Client " + clientId);
+                        txtMessage.setText("Message " + msgCount);
+                        LOGGER.log(Level.TRACE, "Send Message (" + correlationId + "): " + txtMessage.getText());
+                        producer.send(txtMessage);
+                    }
+
+                }
+            }
+            session.close();
+            connection.close();
+            
+            
         } catch (JMSException e) {
             LOGGER.log(Level.ERROR, e);
+        } catch (InterruptedException ex) {
+            LOGGER.log(Level.ERROR, ex);
         }
     }
  
@@ -89,7 +122,7 @@ public class Client implements MessageListener {
         }
     }
  
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         new Client();
     }
 }
