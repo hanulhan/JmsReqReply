@@ -21,8 +21,8 @@ public class Client implements MessageListener {
     }
  
     public Client() {
-        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
-//        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://192.168.1.61:61616");
+//        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://192.168.21.10:61616");
         Connection connection;
         try {
             LOGGER.log(Level.DEBUG, "Start Client,  Broker: " + connectionFactory.getBrokerURL());
