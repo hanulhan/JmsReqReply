@@ -1,4 +1,4 @@
-package hanulhan.jms.reqreply.textmessage.util;
+package hanulhan.jms.reqreply.topic.util;
 
 
 import javax.jms.DeliveryMode;
