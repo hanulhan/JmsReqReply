@@ -5,7 +5,6 @@
  */
 package hanulhan.jms.reqreply.topic;
 
-import hanulhan.jms.reqreply.topic.util.Settings;
 import static java.lang.Thread.sleep;
 import java.util.Scanner;
 import org.apache.activemq.broker.BrokerService;

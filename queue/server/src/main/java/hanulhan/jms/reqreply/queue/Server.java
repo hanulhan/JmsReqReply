@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hanulhan.jms.reqreply.queue.server;
+package hanulhan.jms.reqreply.queue;
 
 import hanulhan.jms.reqreply.queue.Settings;
 import java.util.Scanner;

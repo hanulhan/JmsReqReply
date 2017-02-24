@@ -40,7 +40,7 @@
                             </descriptorRefs>
                             <archive>
                                 <manifest>
-                                    <mainClass>hanulhan.jms.reqreply.textmessage.server.Server</mainClass>
+                                    <mainClass>hanulhan.jms.reqreply.topic.Server</mainClass>
                                 </manifest>
                             </archive>
                         </configuration>

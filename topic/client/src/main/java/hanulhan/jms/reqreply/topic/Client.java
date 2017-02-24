@@ -1,6 +1,5 @@
-package hanulhan.jms.reqreply.topic.client;
+package hanulhan.jms.reqreply.topic;
 
-import hanulhan.jms.reqreply.topic.util.Settings;
 import static java.lang.Thread.sleep;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
