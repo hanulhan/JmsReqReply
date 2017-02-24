@@ -62,7 +62,7 @@
                             </descriptorRefs>
                             <archive>
                                 <manifest>
-                                    <mainClass>hanulhan.jms.reqreply.textmessage.client.Client</mainClass>
+                                    <mainClass>hanulhan.jms.reqreply.queue.Client</mainClass>
                                 </manifest>
                             </archive>
                         </configuration>

@@ -41,7 +41,7 @@
                             </descriptorRefs>
                             <archive>
                                 <manifest>
-                                    <mainClass>hanulhan.jms.reqreply.textmessage.server.Server</mainClass>
+                                    <mainClass>hanulhan.jms.reqreply.queue.Server</mainClass>
                                 </manifest>
                             </archive>
                         </configuration>
