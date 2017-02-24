@@ -16,6 +16,7 @@
         <module>util</module>
         <module>server</module>
         <module>client</module>
+        <module>pollingClient</module>
     </modules>
 
     <properties>

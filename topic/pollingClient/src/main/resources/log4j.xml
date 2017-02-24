@@ -17,7 +17,7 @@
         <level value="INFO" />
     </logger>    
 
-    <logger name="hanulhan.jms.reqreply.textmessage">
+    <logger name="hanulhan.jms.reqreply.topic">
         <level value="TRACE" />
     </logger>    
 
@@ -49,7 +49,7 @@
     
 
     <root>
-        <level value="INFO" />
+        <level value="WARN" />
         <appender-ref ref="console" />
     </root>
 

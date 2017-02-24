@@ -9,7 +9,7 @@
 
 	
     <artifactId>util</artifactId>
-    <name>JMS-Utils</name>
+    <name>Queue :: Utils</name>
     <packaging>jar</packaging>
     <properties>
     </properties>

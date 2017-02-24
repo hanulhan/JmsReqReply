@@ -10,7 +10,7 @@
 	
 	
     <artifactId>server</artifactId>
-    <name>JMS-Server</name>
+    <name>Queue :: Server</name>
     <packaging>jar</packaging>
     <properties>
     </properties>

@@ -9,7 +9,7 @@
     </parent>
 	
     <artifactId>server</artifactId>
-    <name>JMS-Server</name>
+    <name>Topic :: Server</name>
     <packaging>jar</packaging>
     <properties>
     </properties>

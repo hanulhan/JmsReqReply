@@ -132,13 +132,13 @@ public class Server implements MessageListener {
                 if ((serverId % 2 == 0 && msgCount % 2 == 0) || (serverId % 2 != 0 && msgCount % 2 != 0)) {
                     LOGGER.log(Level.INFO, "Server(" + serverId + ") take the msg and send ACK");
                     TextMessage response = this.session.createTextMessage();
-                    response.setText("Server(" + serverId + ") got messageId: " + message.getJMSCorrelationID());
+                    response.setText("Server(" + serverId + ") ACK to msg: [" + messageText + "], Id: " + message.getJMSCorrelationID());
                     response.setJMSCorrelationID(message.getJMSCorrelationID());
                     this.replyProducer.send(message.getJMSReplyTo(), response);
                 
                     sleep(500);
                     response = this.session.createTextMessage();
-                    response.setText("Server(" + serverId + ") process messageId: " + message.getJMSCorrelationID());
+                    response.setText("Server(" + serverId + ") Response to msg: [" + messageText + "], Id: " + message.getJMSCorrelationID());
                     response.setJMSCorrelationID(message.getJMSCorrelationID());
                     this.replyProducer.send(message.getJMSReplyTo(), response);
                 }

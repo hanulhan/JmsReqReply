@@ -8,7 +8,7 @@
     </parent>
 	
     <artifactId>util</artifactId>
-    <name>JMS-Utils</name>
+    <name>Topic :: Utils</name>
     <packaging>jar</packaging>
     <properties>
     </properties>

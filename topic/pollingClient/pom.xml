@@ -9,9 +9,9 @@
 
 
 
-    <artifactId>client</artifactId>
+    <artifactId>pollingClient</artifactId>
     <packaging>jar</packaging>
-    <name>Topic :: Client</name>
+    <name>Toppic :: Polling-Client</name>
     <properties>
     </properties>
     <dependencies>
@@ -63,7 +63,7 @@
                             </descriptorRefs>
                             <archive>
                                 <manifest>
-                                    <mainClass>hanulhan.jms.reqreply.topic.Client</mainClass>
+                                    <mainClass>hanulhan.jms.reqreply.topic.PollingClient</mainClass>
                                 </manifest>
                             </archive>
                         </configuration>

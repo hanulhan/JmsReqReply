@@ -10,7 +10,7 @@
 	
     <artifactId>client</artifactId>
     <packaging>jar</packaging>
-    <name>JMS-Client</name>
+    <name>Queue :: Client</name>
     <properties>
     </properties>
     <dependencies>
