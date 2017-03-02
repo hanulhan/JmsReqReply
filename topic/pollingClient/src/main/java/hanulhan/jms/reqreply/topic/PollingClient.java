@@ -2,6 +2,7 @@ package hanulhan.jms.reqreply.topic;
 
 import static java.lang.Thread.sleep;
 import java.util.Date;
+import java.util.Enumeration;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
 import javax.jms.*;
@@ -21,6 +22,7 @@ public class PollingClient implements MessageListener {
     private static final Logger LOGGER = Logger.getLogger(PollingClient.class);
     private final int WAIT_FOR_ACK_MILLI_SECONDS = 1000;
     private final int WAIT_FOR_RESPONSE_MILLI_SECONDS = 1000;
+    private final String ident;
 
     public PollingClient(int aId, Boolean aDoReply) throws InterruptedException {
 
@@ -34,9 +36,10 @@ public class PollingClient implements MessageListener {
         String messageText = null;
 
         connectionFactory = new ActiveMQConnectionFactory(Settings.MESSAGE_BROKER_URL);
-
         Connection connection;
         int msgCount = 0;
+        ident = Settings.idents[clientId - 1];
+
         try {
             LOGGER.log(Level.DEBUG, "Start Client(" + clientId + "),  Broker: " + connectionFactory.getBrokerURL());
             connection = connectionFactory.createConnection();
@@ -75,6 +78,7 @@ public class PollingClient implements MessageListener {
                         //Now create the actual message you want to send
                         txtMessage = session.createTextMessage();
                         txtMessage.setJMSCorrelationID(correlationId);
+                        txtMessage.setStringProperty(ident, ident);
                         if (aDoReply) {
                             txtMessage.setJMSReplyTo(tempDest);
                         } else {
@@ -90,26 +94,80 @@ public class PollingClient implements MessageListener {
                             myStartTime = new Date();
                             Message myMessage1 = null;
 
+                            // Wait for first reply / Acknowledge
                             myMessage1 = responseConsumer.receive(WAIT_FOR_ACK_MILLI_SECONDS);
 
                             myMilliSeconds = (int) ((new Date().getTime() - myStartTime.getTime()));
                             if (myMessage1 != null) {
+
+                                // Receive first response, ACK
                                 if (myMessage1 instanceof TextMessage) {
                                     receiveMessage = (TextMessage) myMessage1;
                                     messageText = receiveMessage.getText();
-                                    LOGGER.log(Level.DEBUG, "Client receive [" + messageText + "] in " + myMilliSeconds + "ms, waiting for more");
+                                    LOGGER.log(Level.DEBUG, "Client receive [" + messageText + "] in " + myMilliSeconds + "ms, awaiting more");
                                 }
-                                
+
                                 myStartTime = new Date();
                                 Message myMessage2 = null;
-                                myMessage2 = responseConsumer.receive(5000);
+
                                 myMilliSeconds = (int) ((new Date().getTime() - myStartTime.getTime()));
+
+                                // Wait for second response
+                                myMessage2 = responseConsumer.receive(WAIT_FOR_RESPONSE_MILLI_SECONDS);
 
                                 if (myMessage2 != null) {
                                     if (myMessage2 instanceof TextMessage) {
+
+                                        // Second response received
                                         receiveMessage = (TextMessage) myMessage2;
                                         messageText = receiveMessage.getText();
-                                        LOGGER.log(Level.DEBUG, "Client receive [" + messageText + "] in " + myMilliSeconds + ", finished");
+                                        LOGGER.log(Level.DEBUG, "Client receive [" + messageText + "] in " + myMilliSeconds + " ms");
+                                        int myMsgCount = 1;
+
+
+//                                        Enumeration<String> myProperties = myMessage2.getPropertyNames();
+//                                        while (myProperties.hasMoreElements())  {
+//                                            String propertyName = myProperties.nextElement();
+//                                            LOGGER.log(Level.TRACE, "Property " + propertyName + ": " + myMessage2.getObjectProperty(propertyName));
+//                                        }
+                                        // How may respnses are expected                                        
+                                        if (myMessage2.propertyExists("totalCount")) {
+                                            int myTotalMsgCount = myMessage2.getIntProperty("totalCount");
+                                            LOGGER.log(Level.TRACE, "Expecting " + myTotalMsgCount + " Messages");
+                                            if (myTotalMsgCount > 1) {
+                                                // More responses are expected
+                                                do {
+                                                    myStartTime = new Date();
+                                                    myMessage2 = null;
+                                                    myMilliSeconds = (int) ((new Date().getTime() - myStartTime.getTime()));
+                                                    // wati for respnse 3 and more
+                                                    myMessage2 = responseConsumer.receive(5000);
+
+                                                    if (myMessage2 != null) {
+                                                        if (myMessage2 instanceof TextMessage) {
+                                                            receiveMessage = (TextMessage) myMessage2;
+                                                            messageText = receiveMessage.getText();
+
+                                                            LOGGER.log(Level.DEBUG, "Client receive [" + messageText + "] in " + myMilliSeconds + " ms");
+                                                            myMsgCount++;
+                                                        } else {
+                                                            LOGGER.log(Level.DEBUG, "Received Message not a TextMessage");
+                                                        }
+                                                    } else {
+                                                        LOGGER.log(Level.DEBUG, "Messages Timeout. Count: " + myMsgCount + ", totalCount: " + myTotalMsgCount);
+                                                    }
+                                                } while (myMessage2 != null && myMsgCount < 3);
+
+                                                LOGGER.log(Level.DEBUG, "Cancel Receiving. Count: " + myMsgCount + ", totalCount: " + myTotalMsgCount);
+
+                                            } else {
+                                                LOGGER.log(Level.DEBUG, "Total count: " + myTotalMsgCount);
+                                            }
+                                        } else {
+                                            LOGGER.log(Level.DEBUG, "Property tocalCount missing");
+                                        }
+                                    } else {
+                                        LOGGER.log(Level.DEBUG, "Received Messae not a TextMessage");
                                     }
                                 } else {
                                     LOGGER.log(Level.DEBUG, "No Response received within " + WAIT_FOR_RESPONSE_MILLI_SECONDS + " ms");
@@ -118,7 +176,6 @@ public class PollingClient implements MessageListener {
                             } else {
                                 LOGGER.log(Level.DEBUG, "No ACK received within " + WAIT_FOR_ACK_MILLI_SECONDS + " ms");
                             }
-                                
 
                         }
 

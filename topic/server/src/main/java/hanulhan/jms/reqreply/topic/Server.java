@@ -6,6 +6,7 @@
 package hanulhan.jms.reqreply.topic;
 
 import static java.lang.Thread.sleep;
+import java.util.List;
 import java.util.Scanner;
 import org.apache.activemq.broker.BrokerService;
 import org.apache.activemq.ActiveMQConnectionFactory;
@@ -24,13 +25,15 @@ public class Server implements MessageListener {
     private boolean transacted = false;
     private MessageProducer replyProducer;
     private static final Logger LOGGER = Logger.getLogger(Server.class);
+    private List<String> identList;
 
     public Server(int aServerId) {
         serverId = aServerId;
         Boolean terminate = false;
         Scanner keyboard = new Scanner(System.in);
-
-        LOGGER.log(Level.TRACE, "Start Server(id: " + serverId + ")");
+        identList = Settings.getIdentList(serverId);
+                
+        LOGGER.log(Level.TRACE, "Start Server(id: " + serverId + ", Idents: " + identList.toString()  + ")");
 
         //Delegating the handling of messages to another class, instantiate it before setting up JMS so it
         //is ready to handle messages
@@ -110,6 +113,7 @@ public class Server implements MessageListener {
             this.replyProducer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
 
             //Set up a consumer to consume messages off of the admin queue
+//            MessageConsumer consumer = this.session.createConsumer(adminTopic, "ident IN " + identList.toString());
             MessageConsumer consumer = this.session.createConsumer(adminTopic);
             consumer.setMessageListener(this);
         } catch (JMSException e) {
@@ -119,6 +123,7 @@ public class Server implements MessageListener {
     
     @Override
     public void onMessage(Message message) {
+        int i= 1;
         try {
             LOGGER.log(Level.TRACE, "Server::onMessage()");
             if (message instanceof TextMessage) {
@@ -128,19 +133,29 @@ public class Server implements MessageListener {
                 String[] temp = messageText.split("from");
                 String intValue = temp[0].replaceAll("[^0-9]+", "");
                 int msgCount = Integer.parseInt(intValue);
-
-                if ((serverId % 2 == 0 && msgCount % 2 == 0) || (serverId % 2 != 0 && msgCount % 2 != 0)) {
-                    LOGGER.log(Level.INFO, "Server(" + serverId + ") take the msg and send ACK");
-                    TextMessage response = this.session.createTextMessage();
-                    response.setText("Server(" + serverId + ") ACK to msg: [" + messageText + "], Id: " + message.getJMSCorrelationID());
-                    response.setJMSCorrelationID(message.getJMSCorrelationID());
-                    this.replyProducer.send(message.getJMSReplyTo(), response);
+                if (message.propertyExists("ident")) {
+                    LOGGER.log(Level.TRACE, "Message ident: " + message.getStringProperty("ident"));
+                }
                 
-                    sleep(500);
-                    response = this.session.createTextMessage();
-                    response.setText("Server(" + serverId + ") Response to msg: [" + messageText + "], Id: " + message.getJMSCorrelationID());
-                    response.setJMSCorrelationID(message.getJMSCorrelationID());
-                    this.replyProducer.send(message.getJMSReplyTo(), response);
+                // Send a response if desired
+                if (message.getJMSReplyTo() != null)    {
+                    if ((serverId % 2 == 0 && msgCount % 2 == 0) || (serverId % 2 != 0 && msgCount % 2 != 0)) {
+                        LOGGER.log(Level.INFO, "Server(" + serverId + ") take the msg and send ACK");
+                        TextMessage response = this.session.createTextMessage();
+                        response.setText("Server(" + serverId + ") ACK to msg: [" + messageText + "], Id: " + message.getJMSCorrelationID());
+                        response.setJMSCorrelationID(message.getJMSCorrelationID());
+                        this.replyProducer.send(message.getJMSReplyTo(), response);
+
+                        sleep(500);
+                        response = this.session.createTextMessage();
+                        response.setIntProperty("tocalCount", 3);
+                        for (i= 1; i < 4; i++)  {
+                            response.setIntProperty("count", i);
+                            response.setText("Server(" + serverId + ") Response " + i + "/3 to msg: [" + messageText + "], Id: " + message.getJMSCorrelationID());
+                            response.setJMSCorrelationID(message.getJMSCorrelationID());
+                            this.replyProducer.send(message.getJMSReplyTo(), response);
+                        }
+                    }
                 }
                 LOGGER.log(Level.INFO, "Press x + <Enter> to terminate the Server  \n");
 
