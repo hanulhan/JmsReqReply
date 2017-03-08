@@ -4,7 +4,7 @@
     
     <groupId>hanulhan.jms.reqreply</groupId>
     <artifactId>reqreply-master</artifactId>
-    <version>1.0</version>
+    <version>1.1</version>
     <name>JmsReqReply :: Parent</name>
     <packaging>pom</packaging>
     
