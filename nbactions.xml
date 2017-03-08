@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+        <action>
+            <actionName>CUSTOM-update-child-version</actionName>
+            <displayName>update-child-version</displayName>
+            <goals>
+                <goal>versions:update-child-modules</goal>
+            </goals>
+        </action>
+    </actions>
