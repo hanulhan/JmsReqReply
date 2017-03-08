@@ -20,7 +20,7 @@ public class Settings {
 
     public static final String MESSAGE_BROKER_URL = "tcp://192.168.21.10:61616";
     public static final String MESSAGE_QUEUE_NAME = "client.message.reqreply";
-    public static final String MESSAGE_TOPIC_NAME = "topic.reqreply";
+    public static final String MESSAGE_TOPIC_NAME = "vmReqTopic";
 
     // Server
     public static final int REQ_ACK_MODE = Session.AUTO_ACKNOWLEDGE;
