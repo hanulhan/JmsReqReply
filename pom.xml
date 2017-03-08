@@ -73,34 +73,34 @@
             </dependency>
             
             <dependency>
-                <groupId>hanulhan.jms.reqreply.queue</groupId>
-                <artifactId>util</artifactId>
+                <groupId>hanulhan.jms.reqreply</groupId>
+                <artifactId>queue-util</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>hanulhan.jms.reqreply.queue</groupId>
-                <artifactId>client</artifactId>
+                <groupId>hanulhan.jms.reqreply</groupId>
+                <artifactId>queue-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>hanulhan.jms.reqreply.queue</groupId>
-                <artifactId>server</artifactId>
+                <groupId>hanulhan.jms.reqreply</groupId>
+                <artifactId>queue-server</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>hanulhan.jms.reqreply.topic</groupId>
-                <artifactId>util</artifactId>
+                <groupId>hanulhan.jms.reqreply</groupId>
+                <artifactId>topic-util</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>hanulhan.jms.reqreply.topic</groupId>
-                <artifactId>client</artifactId>
+                <groupId>hanulhan.jms.reqreply</groupId>
+                <artifactId>topic-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>hanulhan.jms.reqreply.topic</groupId>
-                <artifactId>server</artifactId>
+                <groupId>hanulhan.jms.reqreply</groupId>
+                <artifactId>topic-server</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

@@ -78,7 +78,7 @@ public class PollingClient implements MessageListener {
                         //Now create the actual message you want to send
                         txtMessage = session.createTextMessage();
                         txtMessage.setJMSCorrelationID(correlationId);
-                        txtMessage.setStringProperty(ident, ident);
+                        txtMessage.setStringProperty(Settings.PROPERTY_NAME_IDENT, ident);
                         if (aDoReply) {
                             txtMessage.setJMSReplyTo(tempDest);
                         } else {
@@ -131,8 +131,8 @@ public class PollingClient implements MessageListener {
 //                                            LOGGER.log(Level.TRACE, "Property " + propertyName + ": " + myMessage2.getObjectProperty(propertyName));
 //                                        }
                                         // How may respnses are expected                                        
-                                        if (myMessage2.propertyExists("totalCount")) {
-                                            int myTotalMsgCount = myMessage2.getIntProperty("totalCount");
+                                        if (myMessage2.propertyExists(Settings.PROPERTY_NAME_TOTAL_COUNT)) {
+                                            int myTotalMsgCount = myMessage2.getIntProperty(Settings.PROPERTY_NAME_TOTAL_COUNT);
                                             LOGGER.log(Level.TRACE, "Expecting " + myTotalMsgCount + " Messages");
                                             if (myTotalMsgCount > 1) {
                                                 // More responses are expected

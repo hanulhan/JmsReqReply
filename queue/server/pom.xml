@@ -2,22 +2,21 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>hanulhan.jms.reqreply.queue</groupId>
+        <groupId>hanulhan.jms.reqreply</groupId>
         <artifactId>queue-master</artifactId>
         <version>1.0</version>
     </parent>
 
 	
-	
-    <artifactId>server</artifactId>
-    <name>Queue :: Server</name>
+    <artifactId>queue-server</artifactId>
+    <name>JmsReqReply :: Queue :: Server</name>
     <packaging>jar</packaging>
     <properties>
     </properties>
     <dependencies>
         <dependency>
-            <groupId>hanulhan.jms.reqreply.queue</groupId>
-            <artifactId>util</artifactId>
+            <groupId>hanulhan.jms.reqreply</groupId>
+            <artifactId>queue-util</artifactId>
         </dependency>
     </dependencies>
 

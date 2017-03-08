@@ -30,6 +30,10 @@ public class Settings {
     public static final int REP_DELIVIRY_MODE = DeliveryMode.NON_PERSISTENT;
     public static final String[] idents = {"AAAA", "BBBB", "CCCC", "DDDD", "EEEE", "FFFF"};
 
+    public static final String PROPERTY_NAME_COUNT = "count";
+    public static final String PROPERTY_NAME_TOTAL_COUNT = "toTalcount";
+    public static final String PROPERTY_NAME_IDENT = "systemIdent";
+    
     public static List<String> getIdentList(int serverId) {
         List<String> myList = new ArrayList<>();
         

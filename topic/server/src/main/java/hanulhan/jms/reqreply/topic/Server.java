@@ -134,7 +134,7 @@ public class Server implements MessageListener {
                 String intValue = temp[0].replaceAll("[^0-9]+", "");
                 int msgCount = Integer.parseInt(intValue);
                 if (message.propertyExists("ident")) {
-                    LOGGER.log(Level.TRACE, "Message ident: " + message.getStringProperty("ident"));
+                    LOGGER.log(Level.TRACE, "Message ident: " + message.getStringProperty(Settings.PROPERTY_NAME_IDENT));
                 }
                 
                 // Send a response if desired
@@ -147,12 +147,19 @@ public class Server implements MessageListener {
                         this.replyProducer.send(message.getJMSReplyTo(), response);
 
                         sleep(500);
-                        response = this.session.createTextMessage();
-                        response.setIntProperty("tocalCount", 3);
+                        
+
                         for (i= 1; i < 4; i++)  {
-                            response.setIntProperty("count", i);
+                            response = this.session.createTextMessage();
+                            response.setIntProperty(Settings.PROPERTY_NAME_COUNT, i);
+                            response.setIntProperty(Settings.PROPERTY_NAME_TOTAL_COUNT, 3);
                             response.setText("Server(" + serverId + ") Response " + i + "/3 to msg: [" + messageText + "], Id: " + message.getJMSCorrelationID());
                             response.setJMSCorrelationID(message.getJMSCorrelationID());
+                            LOGGER.log(Level.INFO, "Server(" + serverId + ") send response " 
+                                                + response.getStringProperty(Settings.PROPERTY_NAME_COUNT) 
+                                                + "/" 
+                                                + response.getStringProperty(Settings.PROPERTY_NAME_TOTAL_COUNT));
+
                             this.replyProducer.send(message.getJMSReplyTo(), response);
                         }
                     }

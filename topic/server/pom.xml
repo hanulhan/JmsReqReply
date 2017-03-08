@@ -3,20 +3,20 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>
-            hanulhan.jms.reqreply.topic</groupId>
+            hanulhan.jms.reqreply</groupId>
         <artifactId>topic-master</artifactId>
         <version>1.0</version>
     </parent>
 	
-    <artifactId>server</artifactId>
-    <name>Topic :: Server</name>
+    <artifactId>topic-server</artifactId>
+    <name>JmsReqReply :: Topic :: Server</name>
     <packaging>jar</packaging>
     <properties>
     </properties>
     <dependencies>
         <dependency>
-            <groupId>hanulhan.jms.reqreply.topic</groupId>
-            <artifactId>util</artifactId>
+            <groupId>hanulhan.jms.reqreply</groupId>
+            <artifactId>topic-util</artifactId>
         </dependency>
     </dependencies>
 

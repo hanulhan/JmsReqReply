@@ -7,7 +7,6 @@
         <version>1.0</version>
     </parent>
 
-    <groupId>hanulhan.jms.reqreply.topic</groupId>
     <artifactId>topic-master</artifactId>
     <name>JmsReqReply :: Topic</name>
     <packaging>pom</packaging>

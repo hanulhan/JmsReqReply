@@ -2,22 +2,22 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>hanulhan.jms.reqreply.topic</groupId>
+        <groupId>hanulhan.jms.reqreply</groupId>
         <artifactId>topic-master</artifactId>
         <version>1.0</version>
     </parent>
 
 
 
-    <artifactId>pollingClient</artifactId>
+    <artifactId>topic-pollingClient</artifactId>
     <packaging>jar</packaging>
-    <name>Toppic :: Polling-Client</name>
+    <name>JmsReqReply :: Topic :: Polling-Client</name>
     <properties>
     </properties>
     <dependencies>
         <dependency>
-            <groupId>hanulhan.jms.reqreply.topic</groupId>
-            <artifactId>util</artifactId>
+            <groupId>hanulhan.jms.reqreply</groupId>
+            <artifactId>topic-util</artifactId>
         </dependency>
     </dependencies>
 
