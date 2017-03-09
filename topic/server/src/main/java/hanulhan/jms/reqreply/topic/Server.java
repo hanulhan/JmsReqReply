@@ -20,6 +20,7 @@ public class Server implements MessageListener {
     private ActiveMQConnectionFactory connectionFactory;
     private Session session;
     private Connection connection;
+    Destination adminTopic;
     private int serverId;
 
     private boolean transacted = false;
@@ -105,7 +106,7 @@ public class Server implements MessageListener {
             connection = connectionFactory.createConnection();
             connection.start();
             this.session = connection.createSession(this.transacted, Settings.REQ_ACK_MODE);
-            Destination adminTopic = this.session.createTopic(Settings.MESSAGE_TOPIC_NAME);
+            adminTopic = this.session.createTopic(Settings.MESSAGE_TOPIC_NAME);
 
             //Setup a message producer to respond to messages from clients, we will get the destination
             //to send to from the JMSReplyTo header field from a Message
@@ -129,7 +130,7 @@ public class Server implements MessageListener {
             if (message instanceof TextMessage) {
                 TextMessage txtMsg = (TextMessage) message;
                 String messageText = txtMsg.getText();
-                LOGGER.log(Level.TRACE, "Server(" + serverId + ") received TextMessage[" + messageText + "]");
+                LOGGER.log(Level.TRACE, "Server(" + serverId + ") received TextMessage[" + messageText + "] from " + adminTopic.toString());
                 String[] temp = messageText.split("from");
                 String intValue = temp[0].replaceAll("[^0-9]+", "");
                 int msgCount = Integer.parseInt(intValue);
@@ -139,10 +140,11 @@ public class Server implements MessageListener {
                 
                 // Send a response if desired
                 if (message.getJMSReplyTo() != null)    {
-                    if ((serverId % 2 == 0 && msgCount % 2 == 0) || (serverId % 2 != 0 && msgCount % 2 != 0)) {
-                        LOGGER.log(Level.INFO, "Server(" + serverId + ") take the msg and send ACK");
+//                    if ((serverId % 2 == 0 && msgCount % 2 == 0) || (serverId % 2 != 0 && msgCount % 2 != 0)) {
+                    {                        
+                        LOGGER.log(Level.INFO, "Server(" + serverId + ") take the msg and send ACK to " + message.getJMSReplyTo().toString());
                         TextMessage response = this.session.createTextMessage();
-                        response.setText("Server(" + serverId + ") ACK to msg: [" + messageText + "], Id: " + message.getJMSCorrelationID());
+                        response.setText("Server(" + serverId + ") ACK to msg: [" + messageText + "], Id: " + message.getJMSCorrelationID() + "\n");
                         response.setJMSCorrelationID(message.getJMSCorrelationID());
                         this.replyProducer.send(message.getJMSReplyTo(), response);
 
@@ -153,12 +155,13 @@ public class Server implements MessageListener {
                             response = this.session.createTextMessage();
                             response.setIntProperty(Settings.PROPERTY_NAME_COUNT, i);
                             response.setIntProperty(Settings.PROPERTY_NAME_TOTAL_COUNT, 3);
-                            response.setText("Server(" + serverId + ") Response " + i + "/3 to msg: [" + messageText + "], Id: " + message.getJMSCorrelationID());
+                            response.setText("Server(" + serverId + ") Response " + i + "\3 to msg: [" + messageText + "], Id: " + message.getJMSCorrelationID() + "\n");
                             response.setJMSCorrelationID(message.getJMSCorrelationID());
                             LOGGER.log(Level.INFO, "Server(" + serverId + ") send response " 
                                                 + response.getStringProperty(Settings.PROPERTY_NAME_COUNT) 
                                                 + "/" 
-                                                + response.getStringProperty(Settings.PROPERTY_NAME_TOTAL_COUNT));
+                                                + response.getStringProperty(Settings.PROPERTY_NAME_TOTAL_COUNT)
+                                                + " to " + message.getJMSReplyTo().toString());
 
                             this.replyProducer.send(message.getJMSReplyTo(), response);
                         }

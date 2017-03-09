@@ -2,7 +2,6 @@ package hanulhan.jms.reqreply.topic;
 
 import static java.lang.Thread.sleep;
 import java.util.Date;
-import java.util.Enumeration;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
 import javax.jms.*;
@@ -86,7 +85,7 @@ public class PollingClient implements MessageListener {
                         }
                         txtMessage.setText("Message " + msgCount + " from Client " + clientId);
 
-                        LOGGER.log(Level.TRACE, "Send Message (" + correlationId + "): " + txtMessage.getText());
+                        LOGGER.log(Level.TRACE, "Send Message (" + correlationId + "): " + txtMessage.getText() + "to " + adminQueue.toString());
                         producer.send(txtMessage);
 
                         if (aDoReply) {
@@ -104,7 +103,7 @@ public class PollingClient implements MessageListener {
                                 if (myMessage1 instanceof TextMessage) {
                                     receiveMessage = (TextMessage) myMessage1;
                                     messageText = receiveMessage.getText();
-                                    LOGGER.log(Level.DEBUG, "Client receive [" + messageText + "] in " + myMilliSeconds + "ms, awaiting more");
+                                    LOGGER.log(Level.DEBUG, "Client receive [" + messageText + "] in " + myMilliSeconds + "ms from " + tempDest.toString());
                                 }
 
                                 myStartTime = new Date();
@@ -121,7 +120,7 @@ public class PollingClient implements MessageListener {
                                         // Second response received
                                         receiveMessage = (TextMessage) myMessage2;
                                         messageText = receiveMessage.getText();
-                                        LOGGER.log(Level.DEBUG, "Client receive [" + messageText + "] in " + myMilliSeconds + " ms");
+                                        LOGGER.log(Level.DEBUG, "Client receive [" + messageText + "] in " + myMilliSeconds + "ms from " + tempDest.toString());
                                         int myMsgCount = 1;
 
 
@@ -148,7 +147,7 @@ public class PollingClient implements MessageListener {
                                                             receiveMessage = (TextMessage) myMessage2;
                                                             messageText = receiveMessage.getText();
 
-                                                            LOGGER.log(Level.DEBUG, "Client receive [" + messageText + "] in " + myMilliSeconds + " ms");
+                                                            LOGGER.log(Level.DEBUG, "Client receive [" + messageText + "] in " + myMilliSeconds + "ms from " + tempDest.toString());
                                                             myMsgCount++;
                                                         } else {
                                                             LOGGER.log(Level.DEBUG, "Received Message not a TextMessage");
