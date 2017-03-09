@@ -144,7 +144,7 @@ public class Server implements MessageListener {
                     {                        
                         LOGGER.log(Level.INFO, "Server(" + serverId + ") take the msg and send ACK to " + message.getJMSReplyTo().toString());
                         TextMessage response = this.session.createTextMessage();
-                        response.setText("Server(" + serverId + ") ACK to msg: [" + messageText + "], Id: " + message.getJMSCorrelationID() + "\n");
+                        response.setText("Server(" + serverId + ") ACK to msg: [" + messageText + "], Id: " + message.getJMSCorrelationID());
                         response.setJMSCorrelationID(message.getJMSCorrelationID());
                         this.replyProducer.send(message.getJMSReplyTo(), response);
 
@@ -155,7 +155,7 @@ public class Server implements MessageListener {
                             response = this.session.createTextMessage();
                             response.setIntProperty(Settings.PROPERTY_NAME_COUNT, i);
                             response.setIntProperty(Settings.PROPERTY_NAME_TOTAL_COUNT, 3);
-                            response.setText("Server(" + serverId + ") Response " + i + "\3 to msg: [" + messageText + "], Id: " + message.getJMSCorrelationID() + "\n");
+                            response.setText("Server(" + serverId + ") Response " + i + "von 3 to msg: [" + messageText + "], Id: " + message.getJMSCorrelationID());
                             response.setJMSCorrelationID(message.getJMSCorrelationID());
                             LOGGER.log(Level.INFO, "Server(" + serverId + ") send response " 
                                                 + response.getStringProperty(Settings.PROPERTY_NAME_COUNT) 
